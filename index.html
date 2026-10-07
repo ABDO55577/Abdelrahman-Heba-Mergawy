@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" class="dark scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ABDEL RAHMAN HEBA MERGAWY — Red Teaming & QA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet" />
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              background: 'rgb(var(--background) / <alpha-value>)',
+              foreground: 'rgb(var(--foreground) / <alpha-value>)',
+              muted: 'rgb(var(--muted) / <alpha-value>)',
+              card: 'rgb(var(--card) / <alpha-value>)',
+              border: 'rgb(var(--border) / <alpha-value>)',
+              primary: 'rgb(var(--primary) / <alpha-value>)',
+              accent: 'rgb(var(--accent) / <alpha-value>)',
+            },
+            fontFamily: {
+              sans: ['"Space Grotesk"', '"Cairo"', 'sans-serif'],
+              mono: ['"JetBrains Mono"', 'monospace'],
+            },
+            animation: {
+              'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+              'ping-slow': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
+            },
+            keyframes: {
+              fadeInUp: { '0%': { opacity: 0, transform: 'translateY(20px)' }, '100%': { opacity: 1, transform: 'translateY(0)' } }
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+      :root {
+        --background: 245 247 250; --foreground: 15 23 42; --muted: 100 116 139; --card: 255 255 255;
+        --border: 203 213 225; --primary: 5 150 105; --accent: 37 99 235;
+      }
+      .dark {
+        --background: 8 11 18; --foreground: 226 232 240; --muted: 148 163 184; --card: 15 20 30;
+        --border: 39 48 66; --primary: 74 222 128; --accent: 56 189 248;
+      }
+      body { background-color: rgb(var(--background)); color: rgb(var(--foreground)); }
+      .text-glow { text-shadow: 0 0 24px rgb(var(--primary) / 0.55); }
+      .grid-bg {
+        background-image: linear-gradient(rgb(var(--border) / 0.2) 1px, transparent 1px), linear-gradient(90deg, rgb(var(--border) / 0.2) 1px, transparent 1px);
+        background-size: 40px 40px;
+      }
+      .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+      .reveal.active { opacity: 1; transform: translateY(0); }
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-track { background: rgb(var(--background)); }
+      ::-webkit-scrollbar-thumb { background: rgb(var(--border)); border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: rgb(var(--primary)); }
+      
+      .typing-cursor::after { content: '|'; animation: blink 1s step-start infinite; color: rgb(var(--primary)); margin-left: 4px; font-weight: bold;}
+      @keyframes blink { 50% { opacity: 0; } }
+    </style>
+  </head>
+
+  <body class="font-sans antialiased overflow-x-hidden">
+    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 translate-y-24 opacity-0 transition-all duration-300 bg-primary text-background px-5 py-3 rounded-xl font-mono text-sm font-bold shadow-2xl z-[100] flex items-center gap-3"></div>
+    <div id="app"></div>
+
+    <script>
+      let lang = localStorage.getItem('lang') || 'en';
+      const t = (val) => (typeof val === 'object' ? (val[lang] || val.en) : val);
+
+      const CONFIG = {
+        person: {
+          name: { en: 'ABDEL RAHMAN', ar: 'عبد الرحمن' },
+          nameHighlight: { en: 'HEBA MERGAWY', ar: 'هيبة مرجاوي' },
+          status: { en: 'Available for Red Teaming & QA Projects', ar: 'متاح لمشاريع محاكاة الهجمات واختبار البرمجيات' },
+          role: { en: 'Red Teaming Specialist | Software QA Tester', ar: 'متخصص فريق أحمر | مختبر جودة برمجيات' },
+          photo: 'profile.jpg',
+          cvUrl: 'cv.pdf',
+          about: {
+            en: 'I am a Cybersecurity Engineering student bridging the gap between offensive security and software quality. I specialize in *Red Teaming* to simulate advanced adversaries, and *Software Testing (QA)* to ensure applications are functionally flawless and secure by design.',
+            ar: 'أنا طالب هندسة أمن سيبراني أجمع بين الأمن الهجومي وجودة البرمجيات. أتخصص في محاكاة الهجمات *(Red Teaming)* لاختبار صلابة الأنظمة، واختبار جودة البرمجيات *(QA)* لضمان خلو التطبيقات من الأخطاء البرمجية والثغرات الأمنية.'
+          },
+          facts: [
+            { k: { en: 'Focus', ar: 'التخصص' }, v: { en: 'Red Teaming & QA', ar: 'الاختراق الهجومي والجودة' } },
+            { k: { en: 'Domain', ar: 'المجال' }, v: { en: 'Networks & Software', ar: 'الشبكات والبرمجيات' } },
+            { k: { en: 'Education', ar: 'التعليم' }, v: { en: 'BSU Cybersecurity', ar: 'أمن سيبراني - BSU' } },
+            { k: { en: 'Mindset', ar: 'المنهجية' }, v: { en: 'Break & Build', ar: 'الاختراق والتحسين' } },
+          ],
+        },
+        socials: [
+          { label: 'LinkedIn', value: '/in/abdelrahman-heba', href: 'https://www.linkedin.com/in/abdelrahman-heba', icon: 'linkedin' },
+          { label: 'GitHub', value: '@ABDO55577', href: 'https://github.com/ABDO55577', icon: 'github' },
+          { label: 'Upwork', value: 'Abdelrahman M.', href: 'https://www.upwork.com/freelancers/~01ec61d79c39eee69d', icon: 'briefcase' },
+          { label: 'WhatsApp', value: '+20 112 138 9414', href: 'https://wa.me/201121389414', icon: 'whatsapp', copyable: true },
+          { label: 'Email', value: 'abdulrahmanhyba@gmail.com', href: 'mailto:abdulrahmanhyba@gmail.com', icon: 'mail', copyable: true },
+        ],
+        services: [
+          { icon: 'crosshair', title: { en: 'Red Teaming Operations', ar: 'عمليات الفريق الأحمر (Red Teaming)' }, desc: { en: 'Simulating real-world cyber attacks to test Active Directory and network defenses.', ar: 'محاكاة هجمات سيبرانية حقيقية لاختبار قوة دفاعات الشبكات وبيئات Active Directory.' } },
+          { icon: 'bug', title: { en: 'Software QA Testing', ar: 'اختبار جودة البرمجيات (QA)' }, desc: { en: 'Rigorous manual testing, detailed bug tracking, and comprehensive UI/UX validation.', ar: 'اختبار يدوي دقيق، تتبع شامل للأخطاء البرمجية، والتحقق من واجهة وتجربة المستخدم.' } },
+          { icon: 'network', title: { en: 'Web Application Pentesting', ar: 'اختبار اختراق تطبيقات الويب' }, desc: { en: 'Identifying injection flaws, logic bugs, and access control issues before deployment.', ar: 'اكتشاف ثغرات الحقن، والأخطاء المنطقية، ومشاكل الصلاحيات قبل إطلاق التطبيقات.' } },
+        ],
+        certifications: [
+          { title: 'Software Testing & Network Security', issuer: 'NTI / DEPI', date: 'June 2026', icon: 'server' },
+          { title: 'Oracle AI Foundations', issuer: 'Oracle', date: 'August 2026', icon: 'shield' },
+          { title: 'SOC Investigation Labs', issuer: 'LetsDefend', date: 'August 2026', icon: 'radar' }
+        ],
+        skillGroups: [
+          { icon: 'crosshair', label: { en: 'Red Teaming', ar: 'أدوات الاختراق الهجومي' }, items: ['Kali Linux', 'Metasploit', 'Nmap', 'Active Directory', 'Wireshark'] },
+          { icon: 'bug', label: { en: 'Software Testing (QA)', ar: 'اختبار البرمجيات' }, items: ['Manual Testing', 'Bug Tracking', 'UI/UX Testing', 'SQL Testing'] },
+          { icon: 'code', label: { en: 'Development', ar: 'البرمجة وقواعد البيانات' }, items: ['Java', 'Python', 'SQL Server', 'Bash Scripting'] },
+        ],
+        categories: { en: ['All', 'Red Teaming', 'Software Testing'], ar: ['الكل', 'محاكاة الهجمات', 'اختبار البرمجيات'] },
+        projects: [
+          { category: ['Red Teaming'], icon: 'radar', title: { en: 'Threat Emulation & Analysis', ar: 'محاكاة وتحليل التهديدات' }, desc: { en: 'Analyzed endpoint logs and network traffic for LNK exploits and Lumma Stealer behavior.', ar: 'تحليل سلوكيات الثغرات وحركة الشبكة لمحاكاة هجمات متقدمة مثل Lumma Stealer.' }, tags: ['Red Teaming', 'Wireshark', 'LetsDefend'] },
+          { category: ['Software Testing'], icon: 'database', title: { en: 'Pharmacy GUI Testing', ar: 'اختبار نظام إدارة صيدلية' }, desc: { en: 'Designed and structurally tested a relational SQL schema integrated with a Python interface.', ar: 'تصميم واختبار جودة نظام قاعدة بيانات متكامل باستخدام SQL Server وواجهة Python.' }, tags: ['QA', 'SQL Server', 'Python'] },
+          { category: ['Software Testing'], icon: 'tractor', title: { en: 'Tractor Manager PWA', ar: 'اختبار تطبيق إدارة زراعية' }, desc: { en: 'Conducted offline-capability and functional testing for an agricultural Progressive Web App.', ar: 'إجراء اختبارات الجودة الوظيفية واختبار العمل بدون إنترنت لتطبيق ويب زراعي.' }, tags: ['Software Testing', 'PWA', 'JS'] },
+        ],
+        nav: [
+          { label: { en: 'About', ar: 'نبذة' }, href: '#about' }, { label: { en: 'Services', ar: 'خدماتي' }, href: '#services' },
+          { label: { en: 'Certs', ar: 'شهاداتي' }, href: '#certs' }, { label: { en: 'Projects', ar: 'مشاريعي' }, href: '#projects' },
+          { label: { en: 'Contact', ar: 'تواصل' }, href: '#contact' }
+        ],
+      };
+
+      const ICONS = {
+        shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/>', terminal: '<polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/>',
+        arrowRight: '<line x1="5" x2="19" y1="12" y2="12"/><polyline points="12 5 19 12 12 19"/>', download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>',
+        send: '<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>', check: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+        network: '<rect x="9" y="2" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="16" y="16" width="6" height="6" rx="1"/><path d="M12 8v4M5 16v-2a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v2"/>',
+        bug: '<path d="m8 2 1.88 1.88M14.12 3.88 16 2M9 7.13V6a3 3 0 1 1 6 0v1.13"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6ZM3 13h3M18 13h3M3 8l3 1M18 9l3-1M3 18l3-1M18 17l3 1"/>',
+        crosshair: '<circle cx="12" cy="12" r="10"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="6" y2="2"/><line x1="12" x2="12" y1="22" y2="18"/>',
+        wrench: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/>',
+        server: '<rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/>',
+        code: '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
+        radar: '<path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"/><path d="M4 6h.01"/><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"/><path d="M16.24 7.76A6 6 0 1 0 8.23 16.67"/><path d="M12 18h.01"/><path d="M17.99 11.66A6 6 0 0 1 15.77 16.67"/><circle cx="12" cy="12" r="2"/><path d="m13.41 10.59 5.66-5.66"/>',
+        database: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/>',
+        tractor: '<path d="M4 4h5l1.5 6.5"/><path d="M9.5 12H14l1-7h4v9"/><circle cx="7" cy="17" r="3"/><circle cx="17" cy="18" r="2"/><path d="M10 17h5M4 4v9"/>',
+        linkedin: '<path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6Z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/>',
+        github: '<path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/>',
+        briefcase: '<rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
+        whatsapp: '<path d="M12 2a10 10 0 0 0-8.6 15l-1.4 5 5.1-1.3A10 10 0 1 0 12 2Z"/><path d="M8.5 8c-.3 0-.6.1-.8.4-.3.3-.9.9-.9 2.1s.9 2.4 1 2.6c.1.2 1.7 2.7 4.3 3.7 2.1.8 2.6.7 3 .6.6-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2-.1-.1-.3-.2-.6-.3l-1.6-.8c-.2-.1-.4-.1-.6.1l-.7.9c-.1.2-.3.2-.5.1-.7-.3-1.4-.6-2.3-1.6-.3-.4-.6-.8-.8-1.2-.1-.2 0-.3.1-.4l.4-.5c.1-.2.1-.3.2-.5v-.4c0-.1-.6-1.5-.8-2C9.1 8.1 8.9 8 8.7 8h-.2Z"/>',
+        phone: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z"/>',
+        mail: '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+        sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>',
+        moon: '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+        menu: '<line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/>',
+        globe: '<circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/>'
+      };
+
+      const icon = (name, cls = 'w-5 h-5') => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]||''}</svg>`;
+      const linkAttrs = (h) => (h.startsWith('http') ? 'target="_blank" rel="noopener noreferrer"' : '');
+
+      let activeFilter = 'All';
+
+      function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.innerHTML = icon('check', 'w-5 h-5 text-card') + msg;
+        toast.classList.remove('translate-y-24', 'opacity-0');
+        setTimeout(() => toast.classList.add('translate-y-24', 'opacity-0'), 3000);
+      }
+
+      function handleCopy(e, text) {
+        e.preventDefault();
+        navigator.clipboard.writeText(text).then(() => showToast(t({en: 'Copied successfully!', ar: 'تم النسخ بنجاح!'})));
+      }
+
+      function renderNav() {
+        return `
+        <header class="fixed inset-x-0 top-0 z-50 border-b border-border/20 bg-background/60 backdrop-blur-xl shadow-sm">
+          <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+            <a href="#top" class="flex items-center gap-2 font-mono text-base font-bold"><span class="text-primary">${icon('shield')}</span>${t({en: 'Abdelrahman', ar: 'عبد الرحمن'})}</a>
+            <nav class="hidden items-center gap-8 md:flex">${CONFIG.nav.map(n => `<a href="${n.href}" class="font-mono text-sm text-muted hover:text-primary transition-colors">${t(n.label)}</a>`).join('')}</nav>
+            <div class="flex items-center gap-3">
+              <button onclick="toggleLang()" class="inline-flex size-10 items-center justify-center rounded-full bg-card/50 border border-border/50 text-muted hover:text-primary" title="Toggle Language">${icon('globe')}</button>
+              <button id="themeToggle" class="inline-flex size-10 items-center justify-center rounded-full bg-card/50 border border-border/50 text-muted hover:text-primary"></button>
+            </div>
+          </div>
+        </header>`;
+      }
+
+      function renderHero() {
+        const p = CONFIG.person;
+        return `
+        <section id="top" class="relative pt-36 pb-20 md:pt-48 md:pb-32 overflow-hidden">
+          <div class="grid-bg absolute inset-0 opacity-60"></div>
+          <div class="absolute left-1/2 top-0 h-96 w-96 -translate-x-1/2 rounded-full bg-primary/10 blur-[120px]"></div>
+          <div class="relative mx-auto grid max-w-6xl items-center gap-16 px-6 lg:grid-cols-[1.2fr_1fr]">
+            <div class="animate-fade-in-up">
+              <div class="inline-flex items-center gap-2.5 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 font-mono text-xs font-medium text-primary shadow-[0_0_15px_-3px] shadow-primary/20">
+                <span class="relative flex size-2.5"><span class="absolute inline-flex size-full animate-ping-slow rounded-full bg-primary opacity-75"></span><span class="relative inline-flex size-2.5 rounded-full bg-primary"></span></span>
+                ${t(p.status)}
+              </div>
+              <h1 class="mt-8 text-5xl font-bold leading-[1.1] md:text-6xl">${t(p.name)} <br/> <span class="text-primary text-glow">${t(p.nameHighlight)}</span></h1>
+              <p class="mt-6 flex items-center gap-3 font-mono text-base text-muted md:text-lg">
+                <span class="text-accent bg-accent/10 p-2 rounded-lg">${icon('terminal')}</span>
+                <span id="typewriter" class="typing-cursor"></span>
+              </p>
+              <div class="mt-10 flex flex-wrap gap-4">
+                <a href="#contact" class="inline-flex items-center gap-2 rounded-lg bg-primary px-7 py-3.5 font-mono text-sm font-bold text-background transition-transform hover:scale-105">
+                  ${t({en: 'Start a Project', ar: 'بدء مشروع'})} ${icon('arrowRight', 'w-4 h-4')}
+                </a>
+                <a href="${p.cvUrl}" download class="inline-flex items-center gap-2 rounded-lg border border-accent/50 bg-accent/5 px-7 py-3.5 font-mono text-sm font-medium text-accent hover:bg-accent/15">
+                  ${icon('download', 'w-4 h-4')} ${t({en: 'Download CV', ar: 'تحميل السيرة الذاتية'})}
+                </a>
+              </div>
+              <ul class="mt-12 flex flex-wrap gap-3">
+                ${CONFIG.socials.map(s => `<li><a href="${s.href}" ${linkAttrs(s.href)} ${s.copyable ? `onclick="handleCopy(event, '${s.value}')"` : ''} title="${s.label}" class="inline-flex size-11 items-center justify-center rounded-full bg-card/60 backdrop-blur-sm border border-border/50 text-muted hover:border-primary hover:text-primary transition-all hover:-translate-y-1">${icon(s.icon)}</a></li>`).join('')}
+              </ul>
+            </div>
+            <div class="relative mx-auto lg:mx-0 lg:ml-auto animate-fade-in-up" style="animation-delay: 0.2s">
+              <div class="relative size-64 rounded-full border border-primary/30 bg-card p-2 md:size-80 shadow-2xl">
+                <div class="absolute inset-0 animate-[spin_15s_linear_infinite] rounded-full border-2 border-dashed border-accent/40"></div>
+                <img src="${p.photo}" class="size-full rounded-full object-cover" alt="Profile" />
+                <span class="absolute -bottom-3 left-1/2 -translate-x-1/2 rounded-full border border-primary/40 bg-background/90 px-4 py-1.5 font-mono text-xs font-bold text-primary">root@secure:~#</span>
+              </div>
+            </div>
+          </div>
+        </section>`;
+      }
+
+      const secTitle = (idx, title) => `<div class="flex items-center gap-5"><div class="rounded-lg bg-primary/10 px-3 py-2 font-mono text-sm font-bold text-primary">${idx}</div><h2 class="text-3xl font-bold">${t(title)}</h2><span class="h-px flex-1 bg-border/50"></span></div>`;
+
+      function renderAbout() {
+        const p = CONFIG.person;
+        const text = t(p.about).replace(/\*([^*]+)\*/g, '<span class="text-foreground font-semibold border-b border-primary/40">$1</span>');
+        return `
+        <section id="about" class="scroll-mt-24 border-t border-border/20 py-24 reveal">
+          <div class="mx-auto max-w-6xl px-6">
+            ${secTitle('01', {en: 'About Me', ar: 'نبذة عني'})}
+            <div class="mt-14 grid gap-12 md:grid-cols-[1.4fr_1fr]">
+              <p class="text-lg leading-relaxed text-muted md:text-xl">${text}</p>
+              <dl class="grid grid-cols-2 gap-4">
+                ${p.facts.map(f => `<div class="rounded-xl border border-border/50 bg-card/40 backdrop-blur-md p-5 hover:border-primary/50 transition-colors"><dt class="font-mono text-xs uppercase text-muted">${t(f.k)}</dt><dd class="mt-2 text-sm font-bold text-foreground">${t(f.v)}</dd></div>`).join('')}
+              </dl>
+            </div>
+          </div>
+        </section>`;
+      }
+
+      function renderServices() {
+        return `
+        <section id="services" class="scroll-mt-24 border-t border-border/20 py-24 reveal">
+          <div class="mx-auto max-w-6xl px-6">
+            ${secTitle('02', {en: 'Core Services', ar: 'الخدمات الأساسية'})}
+            <div class="mt-14 grid gap-6 md:grid-cols-3">
+              ${CONFIG.services.map(s => `<div class="rounded-2xl border border-border/50 bg-card/40 backdrop-blur-md p-8 hover:border-primary/60 hover:-translate-y-2 transition-all"><div class="mb-6 inline-flex rounded-xl bg-primary/10 p-4 text-primary">${icon(s.icon, 'w-7 h-7')}</div><h3 class="text-xl font-bold mb-4">${t(s.title)}</h3><p class="text-sm text-muted">${t(s.desc)}</p></div>`).join('')}
+            </div>
+          </div>
+        </section>`;
+      }
+
+      function renderCerts() {
+        return `
+        <section id="certs" class="scroll-mt-24 border-t border-border/20 py-24 reveal">
+          <div class="mx-auto max-w-6xl px-6">
+            ${secTitle('03', {en: 'Certifications', ar: 'الشهادات والتدريبات'})}
+            <div class="mt-14 grid gap-4 md:grid-cols-3">
+              ${CONFIG.certifications.map(c => `<div class="flex items-center gap-4 rounded-xl border border-border/40 bg-card/40 backdrop-blur-md p-5 hover:border-accent/50 transition-colors"><div class="text-accent bg-accent/10 p-3 rounded-lg">${icon(c.icon)}</div><div><h4 class="font-bold text-sm">${c.title}</h4><p class="text-xs text-muted font-mono mt-1">${c.issuer} • ${c.date}</p></div></div>`).join('')}
+            </div>
+          </div>
+        </section>`;
+      }
+
+      function renderSkills() {
+        return `
+        <section id="skills" class="scroll-mt-24 border-t border-border/20 py-24 reveal">
+          <div class="mx-auto max-w-6xl px-6">
+            ${secTitle('04', {en: 'Technical Skills', ar: 'المهارات التقنية'})}
+            <div class="mt-14 grid gap-6 md:grid-cols-3">
+              ${CONFIG.skillGroups.map(g => `<div class="rounded-2xl border border-border/50 bg-card/40 backdrop-blur-md p-8 hover:border-accent/40 transition-colors"><div class="flex items-center gap-4 mb-6"><span class="text-accent bg-accent/10 p-2 rounded-lg">${icon(g.icon)}</span><h3 class="font-mono text-sm font-bold uppercase">${t(g.label)}</h3></div><ul class="flex flex-wrap gap-2.5">${g.items.map(i => `<li class="rounded-lg border border-border/60 bg-background/50 px-3 py-1 font-mono text-xs text-muted">${i}</li>`).join('')}</ul></div>`).join('')}
+            </div>
+          </div>
+        </section>`;
+      }
+
+      function renderProjectsHTML() {
+        const enFilter = activeFilter === 'الكل' ? 'All' : (activeFilter === 'محاكاة الهجمات' ? 'Red Teaming' : (activeFilter === 'اختبار البرمجيات' ? 'Software Testing' : activeFilter));
+        const filtered = CONFIG.projects.filter(p => enFilter === 'All' || p.category.includes(enFilter));
+        return filtered.map(pr => `
+          <div class="group flex flex-col rounded-2xl border border-border/50 bg-card/40 backdrop-blur-md p-8 transition-all hover:-translate-y-2 hover:border-primary/50">
+            <div class="inline-flex rounded-xl bg-primary/10 p-3.5 text-primary mb-6 w-fit">${icon(pr.icon)}</div>
+            <h3 class="text-xl font-bold mb-3">${t(pr.title)}</h3>
+            <p class="text-sm text-muted mb-6 flex-grow">${t(pr.desc)}</p>
+            <div class="flex flex-wrap gap-2 pt-4 border-t border-border/30">${pr.tags.map(t => `<span class="rounded-md bg-background px-2.5 py-1 font-mono text-[11px] text-muted border border-border/30">${t}</span>`).join('')}</div>
+          </div>`).join('');
+      }
+
+      window.setFilter = function(tagIndex) {
+        const englishCategories = CONFIG.categories.en;
+        const translatedCategories = t(CONFIG.categories);
+        activeFilter = englishCategories[tagIndex];
+        
+        document.querySelectorAll('.filter-btn').forEach((btn, i) => {
+          btn.classList.toggle('bg-primary', i === tagIndex);
+          btn.classList.toggle('text-background', i === tagIndex);
+          btn.classList.toggle('bg-card/50', i !== tagIndex);
+          btn.classList.toggle('text-muted', i !== tagIndex);
+        });
+        document.getElementById('projectsGrid').innerHTML = renderProjectsHTML();
+      }
+
+      function renderProjectsSec() {
+        const cats = t(CONFIG.categories);
+        const btns = cats.map((c, i) => `<button onclick="setFilter(${i})" class="filter-btn px-4 py-2 rounded-lg font-mono text-sm font-bold border border-border/50 transition-colors ${i===0 ? 'bg-primary text-background' : 'bg-card/50 text-muted hover:border-primary/50'}">${c}</button>`).join('');
+        return `
+        <section id="projects" class="scroll-mt-24 border-t border-border/20 py-24 reveal">
+          <div class="mx-auto max-w-6xl px-6">
+            ${secTitle('05', {en: 'Projects & Labs', ar: 'المشاريع والمعامل'})}
+            <div class="mt-8 flex flex-wrap gap-3">${btns}</div>
+            <div id="projectsGrid" class="mt-10 grid gap-6 md:grid-cols-3">${renderProjectsHTML()}</div>
+          </div>
+        </section>`;
+      }
+
+      function renderContact() {
+        const inpCls = 'w-full rounded-lg border border-border/60 bg-background/50 px-4 py-3 font-mono text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20';
+        return `
+        <footer id="contact" class="scroll-mt-24 border-t border-border/20 py-24 reveal relative">
+          <div class="mx-auto max-w-5xl px-6 relative">
+            ${secTitle('06', {en: 'Get in Touch', ar: 'تواصل معي'})}
+            <div class="mt-14 grid gap-12 lg:grid-cols-[1.3fr_1fr]">
+              <div class="rounded-2xl border border-border/50 bg-card/60 backdrop-blur-md p-8 shadow-xl">
+                <form id="contactForm" class="flex flex-col gap-6" onsubmit="event.preventDefault(); showToast('${t({en: 'Message Transmitted!', ar: 'تم الإرسال بنجاح!'})}'); this.reset();">
+                  <input required placeholder="${t({en: 'Name', ar: 'الاسم'})}" class="${inpCls}" />
+                  <textarea required rows="4" placeholder="${t({en: 'Project Details...', ar: 'تفاصيل المشروع...'})}" class="${inpCls} resize-none"></textarea>
+                  <button type="submit" class="rounded-lg bg-primary px-8 py-4 font-mono text-sm font-bold text-background hover:scale-[1.02] transition-transform">
+                    ${t({en: 'Transmit Request', ar: 'إرسال الطلب'})}
+                  </button>
+                </form>
+              </div>
+              <div class="flex flex-col gap-4">
+                ${CONFIG.socials.map(s => `<a href="${s.href}" ${linkAttrs(s.href)} ${s.copyable ? `onclick="handleCopy(event, '${s.value}')"` : ''} class="flex items-center gap-4 rounded-xl border border-border/40 bg-card/30 backdrop-blur-md px-5 py-4 hover:border-primary/50 transition-colors"><span class="bg-accent/10 text-accent p-2 rounded-lg">${icon(s.icon)}</span><span class="flex flex-col"><span class="font-mono text-xs text-muted">${s.label}</span><span class="text-sm font-bold hover:text-primary transition-colors">${s.value}</span></span></a>`).join('')}
+              </div>
+            </div>
+          </div>
+        </footer>`;
+      }
+
+      window.toggleLang = () => {
+        lang = lang === 'en' ? 'ar' : 'en';
+        localStorage.setItem('lang', lang);
+        initPage();
+      };
+
+      function initPage() {
+        document.documentElement.lang = lang;
+        document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+        if(lang === 'ar') document.body.classList.add('font-cairo'); else document.body.classList.remove('font-cairo');
+        
+        document.getElementById('app').innerHTML = renderNav() + '<main>' + renderHero() + renderAbout() + renderServices() + renderCerts() + renderSkills() + renderProjectsSec() + '</main>' + renderContact();
+        
+        const isDark = document.documentElement.classList.contains('dark');
+        document.getElementById('themeToggle').innerHTML = icon(isDark ? 'sun' : 'moon');
+        document.getElementById('themeToggle').onclick = () => {
+          document.documentElement.classList.toggle('dark');
+          localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+          initPage();
+        };
+
+        new IntersectionObserver(entries => entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('active') })).observe(document.querySelector('.reveal'));
+        document.querySelectorAll('.reveal').forEach(el => new IntersectionObserver(e => e.forEach(en => {if(en.isIntersecting) en.target.classList.add('active')})).observe(el));
+
+        const tw = document.getElementById('typewriter');
+        let text = t(CONFIG.person.role), i = 0;
+        tw.innerHTML = '';
+        clearInterval(window.twInterval);
+        window.twInterval = setInterval(() => { if(i < text.length) tw.innerHTML += text.charAt(i++); else clearInterval(window.twInterval); }, 50);
+      }
+
+      if (localStorage.getItem('theme') === 'light') document.documentElement.classList.remove('dark');
+      initPage();
+    </script>
+  </body>
+</html>
